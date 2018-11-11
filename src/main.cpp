@@ -1,14 +1,19 @@
 #include <iostream>
+#include <unistd.h>
 
 #include "docopt.h"
 #include "utils/msglog.hpp"
+#include "display/display.hpp"
+#include "model/model.hpp"
 
 msglog::msglog logmsg;
+using namespace display;
+using namespace model;
 
 static const char _USAGE[] =
-    R"(MotherDimas.
+    R"(SnakeDimas.
 Usage:
-  __PROGNAME__ --assets-path apath [--debug-level=<num>]
+  __PROGNAME__
   __PROGNAME__ (-h | --help)
   __PROGNAME__ --version
 Options:
