@@ -128,7 +128,7 @@ namespace net
 
 	NetTransfer::~NetTransfer()
 	{
-
+		close(this->conn_fd);
 	}
 
 	NetServer::NetServer()
@@ -162,6 +162,6 @@ namespace net
 
 	NetServer::~NetServer()
 	{
-
+		close(this->socket_fd);
 	}
 }
