@@ -4,6 +4,8 @@ project(snakedimas)
 # This project requires C++14
 set(CMAKE_CXX_STANDARD 14)
 
+find_package(Threads)
+
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
 
@@ -31,4 +33,7 @@ list(APPEND snakedimas_src_files src/utils/msglog.cpp)
 list(APPEND snakedimas_src_files src/net/net.cpp)
 
 add_executable(snakedimas src/main.cpp ${snakedimas_src_files})
-target_link_libraries(snakedimas ${CURSES_LIBRARY} docopt_s)
+target_link_libraries(snakedimas ${CURSES_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} docopt_s)
+
+add_executable(snakeserver src/server.cpp ${snakedimas_src_files})
+target_link_libraries(snakeserver ${CURSES_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} docopt_s)
