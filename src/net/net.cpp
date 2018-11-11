@@ -121,6 +121,17 @@ namespace net
 		return 0;
 	}
 
+	int NetTransfer::get_ipaddr(std::string& ipstr)
+	{
+		char ips[32];
+		if (inet_ntop(AF_INET, &this->target.sin_addr, ips, INET_ADDRSTRLEN) == NULL)
+		{
+			return -1;
+		}
+		ipstr = ips;
+		return 0;
+	}
+
 	bool NetTransfer::is_connected()
 	{
 		return this->connected;

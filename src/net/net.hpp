@@ -75,6 +75,7 @@ namespace net
 		int open_conn(const std::string& ip_addr, int port);
 		int send_netdata(const NetObject& ndata);
 		int recv_netdata(NetObject& ndata);
+		int get_ipaddr(std::string& ipstr);
 		bool is_connected();
 		~NetTransfer();
 	};
