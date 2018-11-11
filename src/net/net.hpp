@@ -22,6 +22,7 @@ namespace net
 		auth = 0,
 		snake = 1,
 		scenario = 2,
+		input = 3,
 	};
 
 	/*
