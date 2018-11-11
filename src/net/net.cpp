@@ -5,8 +5,10 @@ namespace net
 {
 	NetTransfer::NetTransfer()
 	{
+		int num = 1;
 		this->target.sin_family = AF_INET;
 		this->conn_fd = socket(AF_INET, SOCK_STREAM, 0);
+		setsockopt(this->conn_fd, SOL_SOCKET, SO_REUSEADDR, &num, sizeof(num));
 	}
 
 	NetTransfer::NetTransfer(const struct sockaddr_in* target, int conn_fd)
@@ -144,8 +146,10 @@ namespace net
 
 	NetServer::NetServer()
 	{
+		int num = 1;
 		this->target.sin_family = AF_INET;
 		this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+		setsockopt(this->socket_fd, SOL_SOCKET, SO_REUSEADDR, &num, sizeof(num));
 	}
 
 	int NetServer::open_conn(const std::string &ip_addr, int port)
