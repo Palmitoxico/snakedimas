@@ -8,27 +8,9 @@ namespace display
     
     using namespace model;
     
-//------------------------ Snake_Render ---------------------------------------
-    Snake_Render::Snake_Render(int pos_x, int pos_y, float speed, Direction direction)
-        :Snake(pos_x, pos_y, speed, direction){}
-    
-    
-    void Snake_Render::render_snake()
-    {
-        for(int j = 0; j < this->body.size(); j++){
-            mvaddch(body[j].y, body[j].x, body[j].ch);
-        }
-        
-        refresh();
-    }        
-    
 //-------------------------- Screen -------------------------------------
 
-    Screen::Screen(int start_x, int start_y)
-    {
-        this->cam_x = start_x;
-        this->cam_y = start_y;
-    }
+    Screen::Screen(){}
     
     Screen::~Screen()
     {
@@ -47,29 +29,41 @@ namespace display
         curs_set(0);            /* Do not display cursor */
     }
     
-    void Screen::render_all_snakes(std::vector<Snake_Render>& snakes)
+    void Screen::render_all_snakes(std::vector<std::shared_ptr<Snake>>& snakes, Camera camera)
     {   
         //MAYBE ADD SOME DIFFERENT RENDERIZATIONS DEPENDING ON THE "Direction" ATTRIBUTE
         
         //For each snake in the game
         for(int i = 0; i < snakes.size(); i++){
-            snakes[i].render_snake();            
+            snakes[i]->render_snake(camera);
         }
     }
 
     // WE HAVE TO MAKE SURE THAT THE MAP HAS A SIZE ALWAYS BIGGER THAN MAX{COLS,LINES}
     //ANALYSE THE CASE WHERE cam_x + LINES OU cam_y + COLS > scenario.getMapSize()
-    void Screen::render_scenario(Scenario scenario)
+    void Screen::render_scenario(Scenario scenario, Camera camera)
     {
         int* aux_map = scenario.getMap();
+        int cam_x = camera.getCam_x();
+        int cam_y = camera.getCam_y();
+        int width = camera.getWidth();
+        int height = camera.getHeight();
         
-        for(int i = cam_y; i < cam_y + LINES && i < scenario.getMapSize(); i++){
-            for(int j = cam_x; j < cam_x + COLS && j < scenario.getMapSize(); j++){
-                if(aux_map[i*scenario.getMapSize() + j])
+        for(int i = cam_y; i < cam_y + height && i < scenario.getMapSize(); i++){
+            for(int j = cam_x; j < cam_x + width && j < scenario.getMapSize(); j++){
+                if(aux_map[i*scenario.getMapSize() + j] == 1)
                     mvaddch(i - cam_y,j - cam_x,'#');
+                
+                else if (aux_map[i*scenario.getMapSize() + j] == 2)
+                    mvaddch(i - cam_y,j - cam_x,'$');
             }
-        }
+        }        
         
         refresh();
+    }
+    
+    void Screen::clear_screen()
+    {
+        clear();
     }
 }
