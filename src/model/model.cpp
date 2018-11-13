@@ -8,7 +8,8 @@ namespace model
 {
     
 //------------------- Camera -----------------------------
-
+    int Snake::snake_counter = 0;
+    
     Camera::Camera(int cam_x, int cam_y)
     {
         this->cam_x = cam_x;
@@ -58,6 +59,9 @@ namespace model
     {
         this->speed = speed;
         this->direction = direction;
+        this->uid = Snake::snake_counter;
+        Snake::snake_counter += 1;
+        
         
         Block newBlock;
         newBlock.x = pos_x;
@@ -162,6 +166,11 @@ namespace model
     std::vector<Block> Snake::getBody()
     {
         return body;
+    }
+    
+    int Snake::getUID()
+    {
+        return this->uid;
     }
     
     void Snake::die()

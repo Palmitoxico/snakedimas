@@ -54,6 +54,8 @@ namespace model
         std::vector<Block> body;
         float speed;
         Direction direction;
+        int uid;
+        static int snake_counter;
         
     public:
         Snake(int pos_x, int pos_y, float speed, Direction direction);
@@ -67,6 +69,7 @@ namespace model
         Direction getDirection();
         void setDirection(Direction direction);
         std::vector<Block> getBody();
+        int getUID();
         
         void die();
         void update_pos();
@@ -76,6 +79,8 @@ namespace model
         bool check_body_position(int pos_x, int pos_y);
         bool detect_snake_collision(std::vector<std::shared_ptr<Snake>>& snakes);
     };  
+    
+    //int Snake::snake_counter = 0;
     
     class Scenario
     {
