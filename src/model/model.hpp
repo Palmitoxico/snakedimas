@@ -56,6 +56,7 @@ namespace model
         Direction direction;
         int uid;
         static int snake_counter;
+        bool dead = false;
         
     public:
         Snake(int pos_x, int pos_y, float speed, Direction direction);
@@ -71,7 +72,9 @@ namespace model
         std::vector<Block> getBody();
         int getUID();
         
+        bool getLiviness();        
         void die();
+        
         void update_pos();
         
         void render_snake(Camera camera);
@@ -99,8 +102,8 @@ namespace model
     {
     public:
         Physics();
-        void manage_collisions(std::vector<std::shared_ptr<Snake>>& snakes, Scenario scenario);
-        void update_all(std::vector<std::shared_ptr<Snake>>& snakes, Scenario scenario);
+        void manage_collisions(std::vector<std::shared_ptr<Snake>>& snakes, Scenario& scenario);
+        void update_all(std::vector<std::shared_ptr<Snake>>& snakes, Scenario& scenario);
     };
 }
 

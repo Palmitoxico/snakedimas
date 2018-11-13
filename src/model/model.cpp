@@ -45,7 +45,7 @@ namespace model
     void Camera::setCam_y(int cam_y)
     {
         if(!(cam_y < 0 || cam_y > this->max_y))
-            this->cam_x = cam_x;        
+            this->cam_y = cam_y;
     }
     
 //------------------------- Snake -------------------------
@@ -175,22 +175,7 @@ namespace model
     
     void Snake::die()
     {
-        this->body.clear();
-        
-        std::default_random_engine generator;
-        std::uniform_int_distribution<int> distribution_pos(4,40);
-        std::uniform_int_distribution<int> distribution_dir(0,4);
-        generator.seed((int)time(NULL));
-        
-        Block newBlock;
-        newBlock.x = distribution_pos(generator);
-        newBlock.y = distribution_pos(generator);
-        newBlock.ch = 'o';
-        
-        for(int i = 0; i < 4; i++){
-            this->body.push_back(newBlock);
-            newBlock.x++;
-        }
+        this->dead = true;
     }
     
     void Snake::update_pos()
@@ -221,6 +206,9 @@ namespace model
     
     void Snake::render_snake(Camera camera)
     {
+        if(this->dead)
+            return;
+        
         int start_x = camera.getCam_x();
         int end_x = start_x + camera.getWidth();
         int start_y = camera.getCam_y();
@@ -229,8 +217,7 @@ namespace model
         for(int j = 0; j < this->body.size(); j++){
             if(this->body[j].x >= start_x && this->body[j].x <= end_x 
             && this->body[j].y >= start_y && this->body[j].y <= end_y){
-             
-                mvaddch(this->body[j].y, this->body[j].x, this->body[j].ch);
+                mvaddch(this->body[j].y - start_y, this->body[j].x - start_x, this->body[j].ch);
             }
         }
         
@@ -359,7 +346,7 @@ namespace model
 
     Physics::Physics(){}
 
-    void Physics::manage_collisions(std::vector<std::shared_ptr<Snake>>& snakes, Scenario scenario)
+    void Physics::manage_collisions(std::vector<std::shared_ptr<Snake>>& snakes, Scenario& scenario)
     {
         for(int i = 0; i < snakes.size(); i++){
             if(snakes[i]->detect_snake_collision(snakes)){
@@ -371,7 +358,7 @@ namespace model
         }
     }
     
-    void Physics::update_all(std::vector<std::shared_ptr<Snake>>& snakes, Scenario scenario)
+    void Physics::update_all(std::vector<std::shared_ptr<Snake>>& snakes, Scenario& scenario)
     {
         this->manage_collisions(snakes, scenario);
         for(int i = 0; i < snakes.size(); i++){
