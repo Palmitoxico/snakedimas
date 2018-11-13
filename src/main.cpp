@@ -13,13 +13,14 @@ using namespace model;
 static const char _USAGE[] =
     R"(SnakeDimas.
 Usage:
-  __PROGNAME__
+  __PROGNAME__ [--port=<num> --debug-level=<num>]
   __PROGNAME__ (-h | --help)
   __PROGNAME__ --version
 Options:
-  -h --help           Show this screen.
-  --version           Show version.
-  --debug-level=<num> Debug output verbosity level [default: -1].
+  -h --help            Show this screen.
+  --version            Show version.
+  --port=<num>         TCP port [default: 3001].
+  --debug-level=<num>  Debug output verbosity level [default: -1].
 )";
 
 void search_and_replace(std::string& str, const std::string& old_str, const std::string& new_str)
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
 		= docopt::docopt(USAGE,
 						 { argv + 1, argv + argc },
 						 true,               // show help if requested
-						 "MotherDimas V0.1"); // version string
+						 "SnakeDimas V0.1"); // version string
 
 	if (args["--debug-level"])
 	{
