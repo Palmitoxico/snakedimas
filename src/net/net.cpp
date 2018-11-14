@@ -52,7 +52,7 @@ namespace net
 		npacket.data[3] = (total_packets >> 16) & 0xFF;
 		npacket.data[4] = (total_packets >> 24) & 0xFF;
 
-		if (send(this->conn_fd, &npacket, (sizeof(npacket) - 4088) + npacket.data_len, 0) == -1)
+		if (send(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
 		{
 			this->connected = false;
 			return -1;
@@ -67,7 +67,7 @@ namespace net
 			memcpy(npacket.data, &ndata.data[bytes_sent], bytes_to_send);
 			npacket.data_len = bytes_to_send;
 
-			if (send(this->conn_fd, &npacket, (sizeof(npacket) - 4088) + npacket.data_len, 0) == -1)
+			if (send(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
 			{
 				this->connected = false;
 				return -1;
