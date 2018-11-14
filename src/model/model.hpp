@@ -8,6 +8,7 @@
 #include <ncurses.h>
 #include <vector>
 #include <memory>
+#include "../net/net.hpp"
 
 namespace model 
 {
@@ -50,37 +51,38 @@ namespace model
     
     class Snake 
     {
-    protected:
+    private:
         std::vector<Block> body;
-        float speed;
         Direction direction;
         int uid;
         static int snake_counter;
         bool dead = false;
         
     public:
-        Snake(int pos_x, int pos_y, float speed, Direction direction);
+        Snake(int pos_x, int pos_y, Direction direction);
         ~Snake();
         
         void increase();
         int getHeadPosition_x();
         int getHeadPosition_y();
-        float getSpeed();
-        void setSpeed(float speed);
+        
         Direction getDirection();
         void setDirection(Direction direction);
+        
         std::vector<Block> getBody();
         int getUID();
         
-        bool getLiviness();        
+        bool getLiviness();
         void die();
         
-        void update_pos();
-        
+        void update_pos();        
         void render_snake(Camera camera);
         
         bool check_body_position(int pos_x, int pos_y);
         bool detect_snake_collision(std::vector<std::shared_ptr<Snake>>& snakes);
+        
+        void serialize(net::NetObject& netobj);
+        void unserialize(net::NetObject& netobj);
     };  
     
     //int Snake::snake_counter = 0;
@@ -88,14 +90,16 @@ namespace model
     class Scenario
     {
     private:
-        int map[MAP_SIZE * MAP_SIZE];
+        uint8_t map[MAP_SIZE * MAP_SIZE];
         
     public:
         Scenario();        
         void init();
         int getMapSize();
-        int* getMap();
-        void manage_block_collision(Snake& snake);            
+        uint8_t* getMap();
+        void manage_block_collision(Snake& snake);
+        void serialize(net::NetObject& netobj);
+        void unserialize(net::NetObject& netobj);
     };
     
     class Physics

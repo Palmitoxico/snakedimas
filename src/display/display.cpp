@@ -43,7 +43,7 @@ namespace display
     //ANALYSE THE CASE WHERE cam_x + LINES OU cam_y + COLS > scenario.getMapSize()
     void Screen::render_scenario(Scenario scenario, Camera camera)
     {
-        int* aux_map = scenario.getMap();
+        uint8_t* aux_map = scenario.getMap();
         int cam_x = camera.getCam_x();
         int cam_y = camera.getCam_y();
         int width = camera.getWidth();

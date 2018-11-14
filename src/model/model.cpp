@@ -6,6 +6,7 @@
 
 namespace model
 {
+    using namespace net;
     
 //------------------- Camera -----------------------------
     int Snake::snake_counter = 0;
@@ -55,13 +56,11 @@ namespace model
         
     }*/
     
-    Snake::Snake(int pos_x, int pos_y, float speed, Direction direction)
+    Snake::Snake(int pos_x, int pos_y, Direction direction)
     {
-        this->speed = speed;
         this->direction = direction;
         this->uid = Snake::snake_counter;
         Snake::snake_counter += 1;
-        
         
         Block newBlock;
         newBlock.x = pos_x;
@@ -141,16 +140,6 @@ namespace model
         return this->body[0].y;
     }
     
-    float Snake::getSpeed()
-    {
-        return this->speed;
-    }
-    
-    void Snake::setSpeed(float speed)
-    {
-        this->speed = speed;
-    }
-    
     Direction Snake::getDirection()
     {
         return this->direction;
@@ -171,6 +160,11 @@ namespace model
     int Snake::getUID()
     {
         return this->uid;
+    }
+    
+    bool Snake::getLiviness()
+    {
+        return this->dead;
     }
     
     void Snake::die()
@@ -266,6 +260,130 @@ namespace model
         return false;
     }
     
+    void Snake::serialize(NetObject& netobj)
+    {
+        netobj.id = snake;
+        uint8_t dir;
+        
+        netobj.data.clear();
+        
+        switch(this->direction){
+            case Up:
+            dir = 1;
+            break;
+            
+            case Right:
+            dir = 2;
+            break;
+            
+            case Down:
+            dir = 3;
+            break;
+            
+            case Left:
+            dir = 4;
+            break;
+        }
+        
+        //Serialize direction
+        netobj.data.push_back(dir);
+        
+        //Serialize uid 
+        for(int i = 0; i < 4; i++)
+            netobj.data.push_back((this->uid >> i*8) & 0xFF);
+        
+        //Serialize dead atribute
+        netobj.data.push_back(this->dead);
+        
+        //Serialize body size
+        int size = this->body.size();
+        for(int i = 0; i < 4; i++)
+            netobj.data.push_back((size >> i*8) & 0xFF);
+        
+        //Serialize snake's body
+        for(int i = 0; i < this->body.size(); i++){
+            //Serialize a single block of the body
+            for(int j = 0; j < 4; j++){
+                netobj.data.push_back((this->body[i].x >> j*8) & 0xFF);
+            }
+            
+            for(int j = 0; j < 4; j++){
+                netobj.data.push_back((this->body[i].y >> j*8) & 0xFF);
+            }
+            
+            for(int j = 0; j < 4; j++){
+                netobj.data.push_back((this->body[i].ch >> j*8) & 0xFF);
+            }
+        }    
+    }
+    
+    void Snake::unserialize(NetObject& netobj)
+    {
+        //Unserialize direction
+        int dir = netobj.data[0];
+        switch(dir){
+            case 1:
+            this->direction = Up;
+            break;
+            
+            case 2:
+            this->direction = Right;
+            break;
+            
+            case 3:
+            this->direction = Down;
+            break;
+            
+            case 4:
+            this->direction = Left;
+            break;
+        }
+        
+        //Unserialize uid
+        this->uid = 0;
+        for(int i = 1; i < 5; i++){
+            this->uid >>= 8;
+            this->uid |= (netobj.data[i] << 24);
+        }
+        
+        this->dead = netobj.data[5];
+        
+        int size = 0;
+        for(int i = 6; i < 10; i++){
+            size >>= 8;
+            size |= (netobj.data[i] << 24);
+        }
+    
+        this->body.clear();
+        
+        for(int i = 10; i < 10 + size*12; i += 12){
+            Block newBlock;
+            newBlock.x = 0;
+            newBlock.y = 0;
+            newBlock.ch = 0;
+            
+            //Unserialize x field of the block
+            for(int j = 0; j < 4; j++){
+                newBlock.x >>= 8;
+                newBlock.x |= (netobj.data[i + j] << 24);  
+            }
+            
+            //Unserialize y field of the block
+            for(int j = 4; j < 8; j++){
+                newBlock.y >>= 8;
+                newBlock.y |= (netobj.data[i + j] << 24);  
+            }
+            
+            //Unserialize ch field of the block
+            for(int j = 8; j < 12; j++){
+                newBlock.ch >>= 8;
+                newBlock.ch |= (netobj.data[i + j] << 24);  
+            }
+            
+            this->body.push_back(newBlock);
+        }
+    }
+    
 //----------------- Scenario ---------------------------
 
     Scenario::Scenario()
@@ -299,7 +417,7 @@ namespace model
         }        
     }
     
-    int* Scenario::getMap()
+    uint8_t* Scenario::getMap()
     {
         return map;
     }
@@ -341,7 +459,23 @@ namespace model
             snake.increase();
         }
     }
-    
+
+	void Scenario::serialize(net::NetObject& netobj)
+	{
+		netobj.data.clear();
+        netobj.id = scenario;
+        
+        for(int i = 0; i < MAP_SIZE*MAP_SIZE; i++){
+            netobj.data.push_back(this->map[i]);
+        }
+	}
+
+	void Scenario::unserialize(net::NetObject& netobj)
+	{
+        for(int i = 0; i < MAP_SIZE*MAP_SIZE; i++){
+            this->map[i] = netobj.data[i];
+        }
+	}
 //------------------- Physics ----------------------------
 
     Physics::Physics(){}
