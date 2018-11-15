@@ -1,4 +1,5 @@
 #include <cstring>
+#include <signal.h>
 #include "net.hpp"
 
 namespace net
@@ -52,7 +53,7 @@ namespace net
 		npacket.data[3] = (total_packets >> 16) & 0xFF;
 		npacket.data[4] = (total_packets >> 24) & 0xFF;
 
-		if (send(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
+		if (send(this->conn_fd, &npacket, sizeof(npacket), MSG_NOSIGNAL) < 0)
 		{
 			this->connected = false;
 			return -1;
@@ -67,7 +68,7 @@ namespace net
 			memcpy(npacket.data, &ndata.data[bytes_sent], bytes_to_send);
 			npacket.data_len = bytes_to_send;
 
-			if (send(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
+			if (send(this->conn_fd, &npacket, sizeof(npacket), MSG_NOSIGNAL) < 0)
 			{
 				this->connected = false;
 				return -1;
@@ -81,7 +82,7 @@ namespace net
 	int NetTransfer::recv_netdata(NetObject &ndata)
 	{
 		NetPacket npacket;
-		if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
+		if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) < 0)
 		{
 			this->connected = false;
 			return -1;
@@ -103,7 +104,7 @@ namespace net
 
 		for (int32_t recv_packets = 0; recv_packets < total_packets; recv_packets++)
 		{
-			if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
+			if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) < 0)
 			{
 				this->connected = false;
 				return -1;
