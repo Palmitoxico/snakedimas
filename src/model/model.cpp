@@ -364,20 +364,20 @@ namespace model
             
             //Unserialize x field of the block
             for(int j = 0; j < 4; j++){
-                newBlock.x >>= 8;
-                newBlock.x |= (netobj.data[i + j] << 24);  
+                newBlock.x = (unsigned)newBlock.x >> 8;
+                newBlock.x |= ((unsigned)netobj.data[i + j] << 24);
             }
-            
+
             //Unserialize y field of the block
             for(int j = 4; j < 8; j++){
-                newBlock.y >>= 8;
-                newBlock.y |= (netobj.data[i + j] << 24);  
+                newBlock.y = (unsigned)newBlock.y >> 8;
+                newBlock.y |= ((unsigned)netobj.data[i + j] << 24);
             }
-            
+
             //Unserialize ch field of the block
             for(int j = 8; j < 12; j++){
-                newBlock.ch >>= 8;
-                newBlock.ch |= (netobj.data[i + j] << 24);  
+                newBlock.ch = (unsigned)newBlock.ch >> 8;
+                newBlock.ch |= ((unsigned)netobj.data[i + j] << 24);
             }
             
             this->body.push_back(newBlock);
