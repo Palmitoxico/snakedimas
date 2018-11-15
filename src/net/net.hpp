@@ -73,7 +73,7 @@ namespace net
 		NetTransfer(const struct sockaddr_in* target, int conn_fd);
 		int open_conn(const std::string& ip_addr, int port);
 		int send_netdata(const NetObject& ndata);
-		int recv_netdata(NetObject& ndata);
+		int recv_netdata(NetObject& ndata, int timeout_ms = -1);
 		int get_ipaddr(std::string& ipstr);
 		bool is_connected();
 		~NetTransfer();

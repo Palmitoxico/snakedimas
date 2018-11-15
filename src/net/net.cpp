@@ -1,5 +1,5 @@
 #include <cstring>
-#include <signal.h>
+#include <errno.h>
 #include "net.hpp"
 
 namespace net
@@ -81,14 +81,32 @@ namespace net
 		return 0;
 	}
 
-	int NetTransfer::recv_netdata(NetObject &ndata)
+	int NetTransfer::recv_netdata(NetObject &ndata, int timeout_ms)
 	{
 		NetPacket npacket;
-		if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) < 0)
+
+		if (timeout_ms > 0)
 		{
-			this->connected = false;
-			close(this->conn_fd);
-			return -1;
+			struct timeval tv;
+			tv.tv_sec = timeout_ms / 1000;
+			tv.tv_usec = (timeout_ms % 1000) * 1000;
+			setsockopt(this->conn_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+		}
+
+		if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
+		{
+			auto recv_status = errno;
+			volatile char error_str[512];
+			if (recv_status == ETIMEDOUT || recv_status == EAGAIN)
+			{
+				return -2;
+			}
+			else
+			{
+				this->connected = false;
+				close(this->conn_fd);
+				return -1;
+			}
 		}
 
 		if (npacket.packet_id != control_packet)
@@ -108,11 +126,20 @@ namespace net
 
 		for (int32_t recv_packets = 0; recv_packets < total_packets; recv_packets++)
 		{
-			if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) < 0)
+			if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) == -1)
 			{
-				this->connected = false;
-				close(this->conn_fd);
-				return -1;
+				auto recv_status = errno;
+				volatile char error_str[512];
+				if (recv_status == ETIMEDOUT || recv_status == EAGAIN)
+				{
+					return -2;
+				}
+				else
+				{
+					this->connected = false;
+					close(this->conn_fd);
+					return -1;
+				}
 			}
 
 			if (npacket.packet_id != data_packet)
