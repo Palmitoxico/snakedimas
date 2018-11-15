@@ -23,6 +23,7 @@ namespace net
 		snake = 1,
 		scenario = 2,
 		input = 3,
+		snake_vector = 4,
 	};
 
 	/*
