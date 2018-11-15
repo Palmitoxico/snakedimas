@@ -40,6 +40,19 @@ public:
 		}
 	}
 
+	void remove_player(int uid)
+	{
+		std::lock_guard<std::mutex> lock(game_mutex);
+		for (int i = 0; i < snakes.size(); i++)
+		{
+			if (snakes[i]->getUID() == uid)
+			{
+				snakes.erase(snakes.begin() + i);
+				break;
+			}
+		}
+	}
+
 	void run_interaction()
 	{
 		std::lock_guard<std::mutex> lock(game_mutex);
@@ -144,7 +157,11 @@ int main(int argc, char *argv[])
 		nobj.data.push_back((uid >> 16) & 0xFF);
 		nobj.data.push_back((uid >> 24) & 0xFF);
 		nobj.data_len = nobj.data.size();
-		conn->send_netdata(nobj);
+		if (conn->send_netdata(nobj) == -1)
+		{
+			logmsg.debug_msg("Connection failed! [auth]", 0);
+			continue;
+		}
 		client_conns.push_back(conn);
 
 		client_threads.push_back(
@@ -157,7 +174,8 @@ int main(int argc, char *argv[])
 							auto status = conn->recv_netdata(nobj);
 							if (status != 0)
 							{
-								logmsg.debug_msg("Connection failed!", 0);
+								logmsg.debug_msg("Connection failed! [input]", 0);
+								game_act.remove_player(uid);
 								return;
 							}
 
