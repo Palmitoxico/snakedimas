@@ -56,6 +56,7 @@ namespace net
 		if (send(this->conn_fd, &npacket, sizeof(npacket), MSG_NOSIGNAL) < 0)
 		{
 			this->connected = false;
+			close(this->conn_fd);
 			return -1;
 		}
 
@@ -71,6 +72,7 @@ namespace net
 			if (send(this->conn_fd, &npacket, sizeof(npacket), MSG_NOSIGNAL) < 0)
 			{
 				this->connected = false;
+				close(this->conn_fd);
 				return -1;
 			}
 
@@ -85,12 +87,14 @@ namespace net
 		if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) < 0)
 		{
 			this->connected = false;
+			close(this->conn_fd);
 			return -1;
 		}
 
 		if (npacket.packet_id != control_packet)
 		{
 			this->connected = false;
+			close(this->conn_fd);
 			return -1;
 		}
 
@@ -107,12 +111,14 @@ namespace net
 			if (recv(this->conn_fd, &npacket, sizeof(npacket), 0) < 0)
 			{
 				this->connected = false;
+				close(this->conn_fd);
 				return -1;
 			}
 
 			if (npacket.packet_id != data_packet)
 			{
 				this->connected = false;
+				close(this->conn_fd);
 				return -1;
 			}
 
