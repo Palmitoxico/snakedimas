@@ -3,7 +3,7 @@
 #define MODEL_HPP_
 
 #define MAP_SIZE 200
-#define NUMBER_OF_CASHES 20
+#define NUMBER_OF_CASHES 100
 
 #include <ncurses.h>
 #include <vector>
