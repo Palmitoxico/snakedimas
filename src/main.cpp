@@ -1,24 +1,30 @@
 #include <iostream>
 #include <unistd.h>
+#include <thread>
 
 #include "docopt.h"
 #include "utils/msglog.hpp"
 #include "display/display.hpp"
 #include "model/model.hpp"
+#include "input/input.hpp"
+#include "net/net.hpp"
 
 msglog::msglog logmsg;
 using namespace display;
 using namespace model;
+using namespace input;
+using namespace net;
 
 static const char _USAGE[] =
-    R"(SnakeDimas.
+    R"(SnakeServer.
 Usage:
-  __PROGNAME__ [--port=<num> --debug-level=<num>]
+  __PROGNAME__ --server-ip ip [--port=<num> --debug-level=<num>]
   __PROGNAME__ (-h | --help)
   __PROGNAME__ --version
 Options:
   -h --help            Show this screen.
   --version            Show version.
+  --server-ip ip       Server IP
   --port=<num>         TCP port [default: 3001].
   --debug-level=<num>  Debug output verbosity level [default: -1].
 )";
@@ -51,5 +57,113 @@ int main(int argc, char *argv[])
 		logmsg.set_debug_level(atoi(args["--debug-level"].asString().c_str()));
 		logmsg.debug_msg("Verbose mode", 0);
 	}
+     
+    std::string server_ip = args["--server-ip"].asString();
+    
+    auto conn = std::make_shared<NetTransfer>();
+    auto net_obj = std::make_shared<NetObject>();
+    
+    int recv_status = conn->open_conn(server_ip, atoi(args["--port"].asString().c_str()));
+    if(recv_status == -1)
+	{
+		logmsg.error_msg("Could not open a new connection");
+		return 1;
+	}
+    recv_status = conn->recv_netdata(*net_obj);
+	if(recv_status == -1)
+	{
+		logmsg.error_msg("The server has closed the connection unexpectedly");
+		return 1;
+	}
+    
+    int uid = 0;
+    uid = net_obj->data[0];
+    uid |= net_obj->data[1] << 8;
+    uid |= net_obj->data[2] << 16;
+    uid |= net_obj->data[3] << 24;
+    
+	auto screen = std::make_shared<Screen>();
+    screen->init();
+    
+    auto camera = std::make_shared<Camera>(0,0);
+    auto scenario = std::make_shared<Scenario>();
+	static bool keep_running = true;
+	auto keep_running_ref = std::ref(keep_running);
+    std::thread conn_thread([uid, camera, conn, screen, scenario, keep_running_ref]
+    {
+        NetObject net_obj;
+        while(keep_running_ref){
+            std::vector<std::shared_ptr<Snake>> snakes;
+            int conn_status = conn->recv_netdata(net_obj, 100);
 
+			if (conn_status == -1) {
+				return;
+			}
+            else if (conn_status == -2) {
+				continue;
+			}
+
+            if(net_obj.id == ObjectID::snake){
+                auto dimas = std::make_shared<Snake>(10,10,Up);
+                dimas->unserialize(net_obj);
+				snakes.clear();
+                snakes.push_back(dimas);
+            }
+            else if(net_obj.id == ObjectID::scenario){
+                scenario->unserialize(net_obj);
+            }
+
+			for (int i = 0; i < snakes.size(); i++)
+			{
+				if (snakes[i]->getUID() == uid)
+				{
+					camera->setCam_x(snakes[i]->getHeadPosition_x() - (camera->getWidth() / 2));
+					camera->setCam_y(snakes[i]->getHeadPosition_y() - (camera->getHeight() / 2));
+				}
+			}
+
+			screen->clear_screen();
+            screen->render_scenario(*scenario, *camera);
+            screen->render_all_snakes(snakes, *camera);
+        }
+    });
+
+
+    while(keep_running){
+        Keyboard keyboard;
+		net::NetObject nobj;
+        char input = keyboard.getChar();
+		nobj.id = net::input;
+		nobj.data.clear();
+        switch(input){
+
+            case 'w':
+				nobj.data.push_back(0);
+				conn->send_netdata(nobj);
+            break;
+
+            case 'd':
+				nobj.data.push_back(2);
+				conn->send_netdata(nobj);
+            break;
+
+            case 's':
+				nobj.data.push_back(1);
+				conn->send_netdata(nobj);
+            break;
+
+            case 'a':
+				nobj.data.push_back(3);
+				conn->send_netdata(nobj);
+            break;
+
+            case 'q':
+            keep_running = false;
+            break;
+        }
+    }
+
+	conn_thread.join();
+    screen->stop();
+	return 0;
 }

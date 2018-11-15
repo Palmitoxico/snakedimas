@@ -4,6 +4,7 @@
 #include <sstream>
 #include <memory>
 #include <atomic>
+#include <chrono>
 
 #include "docopt.h"
 #include "utils/msglog.hpp"
@@ -11,6 +12,7 @@
 #include "model/model.hpp"
 
 msglog::msglog logmsg;
+using namespace std::chrono_literals;
 
 class GameAction
 {
@@ -22,7 +24,7 @@ public:
 	int create_player()
 	{
 		std::lock_guard<std::mutex> lock(game_mutex);
-		auto new_snake = std::make_shared<model::Snake>(40, 60, model::Right);
+		auto new_snake = std::make_shared<model::Snake>(10, 10, model::Right);
 		snakes.push_back(new_snake);
 		return new_snake->getUID();
 	}
@@ -32,7 +34,7 @@ public:
 		std::lock_guard<std::mutex> lock(game_mutex);
 		for (int i = 0; i < snakes.size(); i++)
 		{
-			if (snakes[i]->getLiviness() == false)
+			if (snakes[i]->getLiviness() == true)
 			{
 				snakes.erase(snakes.begin() + i);
 				i--;
@@ -63,6 +65,11 @@ public:
 	{
 		std::lock_guard<std::mutex> lock(game_mutex);
 		net_objs.clear();
+
+		auto new_netobj = std::make_shared<net::NetObject>();
+		this->scenario.serialize(*new_netobj);
+		net_objs.push_back(std::move(new_netobj));
+
 		for (int i = 0; i < snakes.size(); i++)
 		{
 			auto new_netobj = std::make_shared<net::NetObject>();
@@ -137,11 +144,35 @@ int main(int argc, char *argv[])
 	std::vector<std::unique_ptr<std::thread>> client_threads;
 	std::vector<std::shared_ptr<net::NetTransfer>> client_conns;
 	GameAction game_act;
+	auto ref_logmsg = std::ref(logmsg);
+
+	std::thread physics_thread(
+		[ref_logmsg, &game_act, &client_conns]
+			{
+				while(1)
+				{
+					std::vector<std::shared_ptr<net::NetObject>> nobjs;
+					game_act.run_interaction();
+					game_act.remove_dead_players();
+					game_act.serialize_all(nobjs);
+					for (int i = 0; i < client_conns.size(); i++)
+					{
+						for (int j = 0; j < nobjs.size(); j++)
+						{
+							if (client_conns[i]->send_netdata(*(nobjs[j].get())) < 0)
+							{
+								break;
+							}
+						}
+					}
+					std::this_thread::sleep_for(100ms);
+				}
+			}
+		);
 
 	while(1)
 	{
 		auto conn = netconn.wait_conn();
-		auto ref_logmsg = std::ref(logmsg);
 
 		std::stringstream debug_str;
 		std::string ipstr;
