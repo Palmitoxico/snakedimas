@@ -156,7 +156,6 @@ int main(int argc, char *argv[])
 		nobj.data.push_back((uid >> 8) & 0xFF);
 		nobj.data.push_back((uid >> 16) & 0xFF);
 		nobj.data.push_back((uid >> 24) & 0xFF);
-		nobj.data_len = nobj.data.size();
 		if (conn->send_netdata(nobj) == -1)
 		{
 			logmsg.debug_msg("Connection failed! [auth]", 0);

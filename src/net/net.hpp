@@ -57,7 +57,6 @@ namespace net
 
 	struct NetObject
 	{
-		uint32_t data_len;
 		ObjectID id;
 		std::vector<uint8_t> data;
 	};

@@ -38,8 +38,8 @@ namespace net
 		NetPacket npacket;
 		int32_t total_packets;
 
-		total_packets = ndata.data_len / 4088;
-		if ((ndata.data_len % 4088) > 0)
+		total_packets = ndata.data.size() / 4088;
+		if ((ndata.data.size() % 4088) > 0)
 		{
 			total_packets += 1;
 		}
@@ -61,9 +61,9 @@ namespace net
 		}
 
 		npacket.packet_id = data_packet;
-		for (int32_t bytes_sent = 0; bytes_sent < ndata.data_len;)
+		for (int32_t bytes_sent = 0; bytes_sent < ndata.data.size();)
 		{
-			int32_t bytes_remaining = ndata.data_len - bytes_sent;
+			int32_t bytes_remaining = ndata.data.size() - bytes_sent;
 			int32_t bytes_to_send = bytes_remaining > 4088 ? 4088 : bytes_remaining;
 
 			memcpy(npacket.data, &ndata.data[bytes_sent], bytes_to_send);
