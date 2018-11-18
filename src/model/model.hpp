@@ -97,6 +97,7 @@ namespace model
         void init();
         int getMapSize();
         uint8_t* getMap();
+        void Generate_Cash();
         void manage_block_collision(Snake& snake);
         void serialize(net::NetObject& netobj);
         void unserialize(net::NetObject& netobj);

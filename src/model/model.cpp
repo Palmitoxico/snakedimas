@@ -404,7 +404,7 @@ namespace model
         }
         
         std::default_random_engine generator;
-        std::uniform_int_distribution<int> distribution_pos(1,MAP_SIZE - 1);
+        std::uniform_int_distribution<int> distribution_pos(1,MAP_SIZE - 2);
         generator.seed((int)time(NULL));        
         
         int rand_x, rand_y;
@@ -415,6 +415,18 @@ namespace model
             
             this->map[rand_y*MAP_SIZE + rand_x] = 2;
         }        
+    }
+    
+    void Scenario::Generate_Cash()
+    {
+        std::default_random_engine generator;
+        std::uniform_int_distribution<int> distribution_pos(1,MAP_SIZE - 2);
+        generator.seed((int)time(NULL));        
+        
+        int rand_x = distribution_pos(generator);
+        int rand_y = distribution_pos(generator);
+            
+        this->map[rand_y*MAP_SIZE + rand_x] = 2;        
     }
     
     uint8_t* Scenario::getMap()
