@@ -8,6 +8,7 @@
 #include "model/model.hpp"
 #include "input/input.hpp"
 #include "net/net.hpp"
+#include "serialize/serialize.hpp"
 
 msglog::msglog logmsg;
 using namespace display;
@@ -103,11 +104,10 @@ int main(int argc, char *argv[])
 				continue;
 			}
 
-            if(net_obj.id == ObjectID::snake){
-                auto dimas = std::make_shared<Snake>(10,10,Up);
-                dimas->unserialize(net_obj);
+            if(net_obj.id == ObjectID::snake_vector){
+				serialize::Vector_Serializer snake_list_serializer;
 				snakes.clear();
-                snakes.push_back(dimas);
+				snake_list_serializer.unserialize_snake_vector(net_obj, snakes);
             }
             else if(net_obj.id == ObjectID::scenario){
                 scenario->unserialize(net_obj);

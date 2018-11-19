@@ -10,6 +10,7 @@
 #include "utils/msglog.hpp"
 #include "net/net.hpp"
 #include "model/model.hpp"
+#include "serialize/serialize.hpp"
 
 msglog::msglog logmsg;
 using namespace std::chrono_literals;
@@ -64,18 +65,15 @@ public:
 	void serialize_all(std::vector<std::shared_ptr<net::NetObject>>& net_objs)
 	{
 		std::lock_guard<std::mutex> lock(game_mutex);
+		serialize::Vector_Serializer snake_list_serializer;
 		net_objs.clear();
 
 		auto new_netobj = std::make_shared<net::NetObject>();
 		this->scenario.serialize(*new_netobj);
 		net_objs.push_back(std::move(new_netobj));
 
-		for (int i = 0; i < snakes.size(); i++)
-		{
-			auto new_netobj = std::make_shared<net::NetObject>();
-			snakes[i]->serialize(*new_netobj);
-			net_objs.push_back(std::move(new_netobj));
-		}
+		auto snake_list_netobj = snake_list_serializer.serialize_snake_vector(snakes);
+		net_objs.push_back(std::move(snake_list_netobj));
 	}
 
 	int change_direction(int uid, model::Direction dir)
