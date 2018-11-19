@@ -3,14 +3,14 @@
 
 namespace serialize{
     
-    net::NetObject Vector_Serializer::serialize_snake_vector(std::vector<std::shared_ptr<model::Snake>>& snakes)
+    std::shared_ptr<net::NetObject> Vector_Serializer::serialize_snake_vector(std::vector<std::shared_ptr<model::Snake>>& snakes)
     {   
-        net::NetObject final_netobj;
-        final_netobj.id = net::snake_vector;
+        auto final_netobj = std::make_shared<net::NetObject>();
+        final_netobj->id = net::snake_vector;
         
         //Serializes the total number of snakes
         for(int i = 0; i < 4; i++)
-            final_netobj.data.push_back((snakes.size() >> i*8) & 0xFF);
+            final_netobj->data.push_back((snakes.size() >> i*8) & 0xFF);
         
         for(int i = 0; i < snakes.size(); i++){
             net::NetObject netobj;
@@ -20,21 +20,19 @@ namespace serialize{
             
             //Serializes the netobj data's field size
             for(int i = 0; i < 4; i++)
-                final_netobj.data.push_back((netobj.data.size() >> i*8) & 0xFF);
+                final_netobj->data.push_back((netobj.data.size() >> i*8) & 0xFF);
             
             //Serializes the netobj's data field
             for(int i = 0; i < netobj.data.size(); i++){
-                final_netobj.data.push_back((netobj.data[i]));
+                final_netobj->data.push_back((netobj.data[i]));
             }
         }
         
         return final_netobj;
     }
     
-    std::vector<std::shared_ptr<model::Snake>> Vector_Serializer::unserialize_snake_vector(net::NetObject& netobj)
+    void Vector_Serializer::unserialize_snake_vector(net::NetObject& netobj, std::vector<std::shared_ptr<model::Snake>>& snakes)
     {
-        std::vector<std::shared_ptr<model::Snake>> snakes;
-        
         //Unserializes the total number of snakes
         int size = 0;
         for(int i = 0; i < 4; i++){
@@ -75,7 +73,5 @@ namespace serialize{
             
             base += data_size + 4;
         }
-        
-        return snakes;
     }
 }

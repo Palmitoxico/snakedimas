@@ -10,8 +10,8 @@ namespace serialize{
     class Vector_Serializer
     {
     public:
-        net::NetObject serialize_snake_vector(std::vector<std::shared_ptr<model::Snake>>& snakes);
-        std::vector<std::shared_ptr<model::Snake>> unserialize_snake_vector(net::NetObject& netobj);
+        std::shared_ptr<net::NetObject> serialize_snake_vector(std::vector<std::shared_ptr<model::Snake>>& snakes);
+        void unserialize_snake_vector(net::NetObject& netobj, std::vector<std::shared_ptr<model::Snake>>& snakes);
     };
 }
 
