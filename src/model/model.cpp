@@ -1,6 +1,4 @@
 #include <iostream>
-#include <vector>
-#include <random>
 #include <ctime>
 #include "model.hpp"
 
@@ -388,9 +386,10 @@ namespace model
 
     Scenario::Scenario()
     {
+		this->generator.seed((int)time(NULL));
         this->init();
     }
-    
+
     void Scenario::init()
     {
         for(int i = 0; i < MAP_SIZE; i++){
@@ -402,33 +401,29 @@ namespace model
                     this->map[i*MAP_SIZE + j] = 0;
             }
         }
-        
-        std::default_random_engine generator;
+
         std::uniform_int_distribution<int> distribution_pos(1,MAP_SIZE - 2);
-        generator.seed((int)time(NULL));        
-        
+
         int rand_x, rand_y;
-        
+
         for(int i = 0; i < NUMBER_OF_CASHES; i++){
-            rand_x = distribution_pos(generator);
-            rand_y = distribution_pos(generator);
-            
+            rand_x = distribution_pos(this->generator);
+            rand_y = distribution_pos(this->generator);
+
             this->map[rand_y*MAP_SIZE + rand_x] = 2;
-        }        
+        }
     }
-    
-    void Scenario::Generate_Cash()
+
+    void Scenario::generate_cash()
     {
-        std::default_random_engine generator;
         std::uniform_int_distribution<int> distribution_pos(1,MAP_SIZE - 2);
-        generator.seed((int)time(NULL));        
-        
-        int rand_x = distribution_pos(generator);
-        int rand_y = distribution_pos(generator);
-            
-        this->map[rand_y*MAP_SIZE + rand_x] = 2;        
+
+        int rand_x = distribution_pos(this->generator);
+        int rand_y = distribution_pos(this->generator);
+
+        this->map[rand_y*MAP_SIZE + rand_x] = 2;
     }
-    
+
     uint8_t* Scenario::getMap()
     {
         return map;

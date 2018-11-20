@@ -8,6 +8,7 @@
 #include <ncurses.h>
 #include <vector>
 #include <memory>
+#include <random>
 #include "../net/net.hpp"
 
 namespace model 
@@ -91,13 +92,14 @@ namespace model
     {
     private:
         uint8_t map[MAP_SIZE * MAP_SIZE];
-        
+        std::default_random_engine generator;
+
     public:
         Scenario();        
         void init();
         int getMapSize();
         uint8_t* getMap();
-        void Generate_Cash();
+        void generate_cash();
         void manage_block_collision(Snake& snake);
         void serialize(net::NetObject& netobj);
         void unserialize(net::NetObject& netobj);
