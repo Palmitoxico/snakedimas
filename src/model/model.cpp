@@ -340,20 +340,20 @@ namespace model
         //Unserialize uid
         this->uid = 0;
         for(int i = 1; i < 5; i++){
-            this->uid >>= 8;
-            this->uid |= (netobj.data[i] << 24);
+            this->uid = (unsigned)this->uid >> 8;
+            this->uid |= ((unsigned)netobj.data[i] << 24);
         }
-        
+
         this->dead = netobj.data[5];
-        
+
         int size = 0;
         for(int i = 6; i < 10; i++){
-            size >>= 8;
-            size |= (netobj.data[i] << 24);
+            size = (unsigned)size >> 8;
+            size |= ((unsigned)netobj.data[i] << 24);
         }
-    
+
         this->body.clear();
-        
+
         for(int i = 10; i < 10 + size*12; i += 12){
             Block newBlock;
             newBlock.x = 0;
