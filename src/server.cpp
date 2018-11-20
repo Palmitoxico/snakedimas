@@ -62,6 +62,17 @@ public:
 		newton.update_all(snakes, scenario);
 	}
 
+	void spaw_cash()
+	{
+		std::lock_guard<std::mutex> lock(game_mutex);
+		this->scenario.generate_cash();
+	}
+
+	int get_num_players()
+	{
+		return this->snakes.size();
+	}
+
 	void serialize_all(std::vector<std::shared_ptr<net::NetObject>>& net_objs)
 	{
 		std::lock_guard<std::mutex> lock(game_mutex);
@@ -148,6 +159,7 @@ int main(int argc, char *argv[])
 	std::thread physics_thread(
 		[ref_logmsg, &game_act, &client_conns]
 			{
+				uint64_t round = 0;
 				while(1)
 				{
 					std::vector<std::shared_ptr<net::NetObject>> nobjs;
@@ -164,7 +176,21 @@ int main(int argc, char *argv[])
 							}
 						}
 					}
+
+					/*
+					 * Spaw cash every 5 rounds, proportionally to the
+					 * number of active players
+					 */
+					if (round % 5 == 0)
+					{
+						for (int i = 0; i < game_act.get_num_players(); i++)
+						{
+							game_act.spaw_cash();
+						}
+					}
+
 					std::this_thread::sleep_for(100ms);
+					round++;
 				}
 			}
 		);
