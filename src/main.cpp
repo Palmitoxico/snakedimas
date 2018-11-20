@@ -89,10 +89,17 @@ int main(int argc, char *argv[])
     auto camera = std::make_shared<Camera>(0,0);
     auto scenario = std::make_shared<Scenario>();
 	static bool keep_running = true;
+	static bool alive = true;
 	auto keep_running_ref = std::ref(keep_running);
-    std::thread conn_thread([uid, camera, conn, screen, scenario, keep_running_ref]
+	auto alive_ref = std::ref(alive);
+
+	/*
+	 * Rendering thread
+	 */
+    std::thread conn_thread([uid, camera, conn, screen, scenario, keep_running_ref, &alive]
     {
         NetObject net_obj;
+		int last_score = 0;
         while(keep_running_ref){
             std::vector<std::shared_ptr<Snake>> snakes;
             int conn_status = conn->recv_netdata(net_obj, 100);
@@ -108,23 +115,39 @@ int main(int argc, char *argv[])
 				serialize::Vector_Serializer snake_list_serializer;
 				snakes.clear();
 				snake_list_serializer.unserialize_snake_vector(net_obj, snakes);
+				bool is_alive = false;
+				for (int i = 0; i < snakes.size(); i++)
+				{
+					if (snakes[i]->getUID() == uid)
+					{
+						camera->setCam_x(snakes[i]->getHeadPosition_x() - (camera->getWidth() / 2));
+						camera->setCam_y(snakes[i]->getHeadPosition_y() - (camera->getHeight() / 2));
+						is_alive = true;
+						last_score = snakes[i]->getScore();
+						break;
+					}
+				}
+				if (is_alive == false)
+				{
+					alive = false;
+				}
+				else alive = true;
             }
             else if(net_obj.id == ObjectID::scenario){
                 scenario->unserialize(net_obj);
             }
 
-			for (int i = 0; i < snakes.size(); i++)
-			{
-				if (snakes[i]->getUID() == uid)
-				{
-					camera->setCam_x(snakes[i]->getHeadPosition_x() - (camera->getWidth() / 2));
-					camera->setCam_y(snakes[i]->getHeadPosition_y() - (camera->getHeight() / 2));
-				}
-			}
-
 			screen->clear_screen();
             screen->render_scenario(*scenario, *camera);
             screen->render_all_snakes(snakes, *camera);
+			if (alive == false)
+			{
+				std::string str_dead;
+				str_dead = "You've died. Your Score: " + std::to_string(last_score*100);
+				screen->print_msg(str_dead, 4, 4);
+				screen->print_msg("Press q to exit.", 4, 5);
+
+			}
         }
     });
 
@@ -139,22 +162,26 @@ int main(int argc, char *argv[])
 
             case 'w':
 				nobj.data.push_back(0);
-				conn->send_netdata(nobj);
+				if(alive)
+					conn->send_netdata(nobj);
             break;
 
             case 'd':
 				nobj.data.push_back(2);
-				conn->send_netdata(nobj);
+				if(alive)
+					conn->send_netdata(nobj);
             break;
 
             case 's':
 				nobj.data.push_back(1);
-				conn->send_netdata(nobj);
+				if(alive)
+					conn->send_netdata(nobj);
             break;
 
             case 'a':
 				nobj.data.push_back(3);
-				conn->send_netdata(nobj);
+				if(alive)
+					conn->send_netdata(nobj);
             break;
 
             case 'q':
