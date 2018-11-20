@@ -58,7 +58,7 @@ namespace model
         int uid;
         static int snake_counter;
         bool dead = false;
-        
+
     public:
         Snake(int pos_x, int pos_y, Direction direction);
         ~Snake();
@@ -72,6 +72,7 @@ namespace model
         
         std::vector<Block> getBody();
         int getUID();
+		int getScore();
         
         bool getLiviness();
         void die();
