@@ -40,8 +40,6 @@ namespace serialize{
             size |= (netobj.data[i] << 24);   
         }
         
-        std::cout << "the size of the snake is: " << size << std::endl;
-        
         //Unserializes the vector of snakes
         
         //Unserializes each of the NetObjects
