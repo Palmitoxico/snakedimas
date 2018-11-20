@@ -78,6 +78,7 @@ public:
 
 	int change_direction(int uid, model::Direction dir)
 	{
+		std::lock_guard<std::mutex> lock(game_mutex);
 		for (int i = 0; i < snakes.size(); i++)
 		{
 			if (snakes[i]->getUID() == uid)
