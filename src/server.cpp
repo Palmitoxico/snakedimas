@@ -15,6 +15,10 @@
 msglog::msglog logmsg;
 using namespace std::chrono_literals;
 
+/*
+ * The GameAction class encapsulates the vector of snakes and the
+ * scenario and provides thread-safe methods for interating with these
+ */
 class GameAction
 {
 	std::vector<std::shared_ptr<model::Snake>> snakes;
@@ -156,6 +160,9 @@ int main(int argc, char *argv[])
 	GameAction game_act;
 	auto ref_logmsg = std::ref(logmsg);
 
+	/*
+	 * Physics thread
+	 */
 	std::thread physics_thread(
 		[ref_logmsg, &game_act, &client_conns]
 			{
@@ -166,6 +173,11 @@ int main(int argc, char *argv[])
 					game_act.run_interaction();
 					game_act.remove_dead_players();
 					game_act.serialize_all(nobjs);
+
+					/*
+					 * Send the serialized objects to every client in
+					 * the connections vector
+					 */
 					for (int i = 0; i < client_conns.size(); i++)
 					{
 						for (int j = 0; j < nobjs.size(); j++)
@@ -195,8 +207,14 @@ int main(int argc, char *argv[])
 			}
 		);
 
+	/*
+	 * Main loop
+	 */
 	while(1)
 	{
+		/*
+		 * Wait for a new player connection
+		 */
 		auto conn = netconn.wait_conn();
 
 		std::stringstream debug_str;
@@ -205,6 +223,9 @@ int main(int argc, char *argv[])
 		debug_str << "Client connected, ip = " << ipstr;
 		logmsg.debug_msg(debug_str.str(), 0);
 
+		/*
+		 * Creates a new player and send its uid
+		 */
 		net::NetObject nobj;
 		nobj.id = net::auth;
 		int uid = game_act.create_player();
@@ -219,6 +240,10 @@ int main(int argc, char *argv[])
 		}
 		client_conns.push_back(conn);
 
+		/*
+		 * Create a new thread to every player connected to handle
+		 * keyboard events
+		 */
 		client_threads.push_back(
 			std::make_unique<std::thread>(
 				[uid, conn, ref_logmsg, &game_act]

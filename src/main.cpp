@@ -63,7 +63,10 @@ int main(int argc, char *argv[])
     
     auto conn = std::make_shared<NetTransfer>();
     auto net_obj = std::make_shared<NetObject>();
-    
+
+	/*
+	 * Open a new connection to the server
+	 */
     int recv_status = conn->open_conn(server_ip, atoi(args["--port"].asString().c_str()));
     if(recv_status == -1)
 	{
@@ -76,7 +79,10 @@ int main(int argc, char *argv[])
 		logmsg.error_msg("The server has closed the connection unexpectedly");
 		return 1;
 	}
-    
+
+	/*
+	 * Deserializes the player uid
+	 */
     int uid = 0;
     uid = net_obj->data[0];
     uid |= net_obj->data[1] << 8;
@@ -102,19 +108,39 @@ int main(int argc, char *argv[])
 		int last_score = 0;
         while(keep_running_ref){
             std::vector<std::shared_ptr<Snake>> snakes;
+
+			/*
+			 * Receive a NetObject from the server
+			 */
             int conn_status = conn->recv_netdata(net_obj, 100);
 
+			/*
+			 * Exit this thread if an error occurred when receiving
+			 * data from the server
+			 */
 			if (conn_status == -1) {
 				return;
 			}
+
+			/*
+			 * Timeout, continue the loop
+			 */
             else if (conn_status == -2) {
 				continue;
 			}
 
+			/*
+			 * Deserializes a vector of snakes
+			 */
             if(net_obj.id == ObjectID::snake_vector){
 				serialize::Vector_Serializer snake_list_serializer;
 				snakes.clear();
 				snake_list_serializer.unserialize_snake_vector(net_obj, snakes);
+
+				/*
+				 * Check if the player for this session is alive,
+				 * centers the camera to the player's head
+				 */
 				bool is_alive = false;
 				for (int i = 0; i < snakes.size(); i++)
 				{
@@ -133,10 +159,17 @@ int main(int argc, char *argv[])
 				}
 				else alive = true;
             }
+
+			/*
+			 * Deserializes the scenario
+			 */
             else if(net_obj.id == ObjectID::scenario){
                 scenario->unserialize(net_obj);
             }
 
+			/*
+			 * Do all rendering stuff
+			 */
 			screen->clear_screen();
             screen->render_scenario(*scenario, *camera);
             screen->render_all_snakes(snakes, *camera);
@@ -152,6 +185,9 @@ int main(int argc, char *argv[])
     });
 
 
+	/*
+	 * Keyboard event loop
+	 */
     while(keep_running){
         Keyboard keyboard;
 		net::NetObject nobj;
@@ -185,7 +221,7 @@ int main(int argc, char *argv[])
             break;
 
             case 'q':
-            keep_running = false;
+				keep_running = false;
             break;
         }
     }
