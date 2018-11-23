@@ -3,6 +3,10 @@
 
 namespace serialize{
     
+    /*
+     * This method serializes the vector of shared_ptr of snakes provided as an argument
+     * and returns a NetObject that wrapps it up
+     */
     std::shared_ptr<net::NetObject> Vector_Serializer::serialize_snake_vector(std::vector<std::shared_ptr<model::Snake>>& snakes)
     {   
         auto final_netobj = std::make_shared<net::NetObject>();
@@ -31,6 +35,9 @@ namespace serialize{
         return final_netobj;
     }
     
+    /*
+     * Provided a NetObject, unserialize it's content into the vector of shared_ptr of snakes also provided as an argument
+     */
     void Vector_Serializer::unserialize_snake_vector(net::NetObject& netobj, std::vector<std::shared_ptr<model::Snake>>& snakes)
     {
         //Unserializes the total number of snakes

@@ -2,6 +2,9 @@
 
 namespace input
 {
+    /*
+     * Initializes the input functionalities of the ncurses
+     */
     Keyboard::Keyboard()
     {
         cbreak();                /* Line buffering disabled	*/
@@ -11,6 +14,9 @@ namespace input
         curs_set(0);             /* Do not display cursor */
     }
     
+    /*
+     * Returns a char typed by the user in the terminal
+     */
     chtype Keyboard::getChar()
     {
         return getch();

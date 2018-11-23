@@ -5,6 +5,9 @@
 
 namespace input
 {
+    /*
+     * Class responsible for manage the input from the keyboard
+     */
     class Keyboard
     {
     public:

@@ -7,6 +7,9 @@
 
 namespace serialize{
     
+    /*
+     * Class responsible for serialize and unserialize a whole vector of snakes
+     */
     class Vector_Serializer
     {
     public:

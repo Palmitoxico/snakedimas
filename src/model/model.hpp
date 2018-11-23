@@ -22,6 +22,9 @@ namespace model
         Left,
     };
     
+    /*
+     * Defines the structure of a single block of a snake
+     */
     struct Block
     {
         int x;
@@ -29,6 +32,10 @@ namespace model
         chtype ch;        
     };
     
+    /*
+     * Class responsible for wrapping up the model of a camera and it's view
+     * of the elements of the game
+     */
     class Camera
     {
     private:
@@ -36,6 +43,8 @@ namespace model
         int cam_y;
         int width = COLS;
         int height = LINES;
+        
+        // Defines maximum values for the coordinates x and y that the camera can go
         int max_x = MAP_SIZE - COLS;
         int max_y = MAP_SIZE - LINES;
         
@@ -50,6 +59,9 @@ namespace model
         void setCam_y(int cam_y);
     };
     
+    /*
+     * Class responsible for wrapping up a single snake
+     */
     class Snake 
     {
     private:
@@ -80,6 +92,7 @@ namespace model
         void update_pos();        
         void render_snake(Camera camera);
         
+        // Internal method, it's used by the method "detect_snake_collision"
         bool check_body_position(int pos_x, int pos_y);
         bool detect_snake_collision(std::vector<std::shared_ptr<Snake>>& snakes);
         
@@ -87,8 +100,9 @@ namespace model
         void unserialize(net::NetObject& netobj);
     };  
     
-    //int Snake::snake_counter = 0;
-    
+    /*
+     * Class responsible for wrapping up the scenario of the game
+     */
     class Scenario
     {
     private:
@@ -106,6 +120,9 @@ namespace model
         void unserialize(net::NetObject& netobj);
     };
     
+    /*
+     * Class responsible for update the elements of the game
+     */
     class Physics
     {
     public:
