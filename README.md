@@ -41,8 +41,18 @@ $ cmake --build . -- -j4 # create up to 4 parallel jobs
 
 ## Running
 
-Execute the ```snakedimas``` binary:
+Execute the ```snakeserver``` binary:
 
 ```bash
-$ ./snakedimas
+$ ./snakeserver
 ```
+
+The ```snakeserver``` will open the 3001 port by default, this can be changed by using the ```--port``` flag.
+
+Now you can execute the client:
+
+```bash
+$ ./snakedimas --server-ip 127.0.0.1
+```
+
+To control the snake you can use the ```A``` ```S``` ```D``` ```W``` keys.
